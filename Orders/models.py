@@ -87,8 +87,6 @@ class ShippingAddress(models.Model):
 
 
     class Meta:
-        unique_together = [
-            ('user', 'full_name', 'phone', 'address', 'city', 'state', 'zip_code')
-        ]
+       unique_together = [('user', 'address')]
     def __str__(self):
         return f"{self.full_name}, {self.address}, {self.city}"    
