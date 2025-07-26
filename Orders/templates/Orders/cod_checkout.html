@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="nexus-checkout-container">
+    <div class="nexus-checkout-header">
+        <h2>Confirm Cash on Delivery</h2>
+    </div>
+
+    <div class="nexus-order-summary">
+        <div class="nexus-summary-card">
+            <h3 class="nexus-summary-title">Order Summary</h3>
+            <div class="nexus-total-row">
+                <span>Subtotal:</span>
+                <span>₹{{ subtotal }}</span>
+            </div>
+            <div class="nexus-total-row">
+                <span>Shipping:</span>
+                <span>₹{{ shipping_fee }}</span>
+            </div>
+            <div class="nexus-total-row nexus-grand-total">
+                <strong>Total:</strong>
+                <strong>₹{{ grand_total }}</strong>
+            </div>
+
+            <form method="post" action="{% url 'orders:place_order' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Confirm Cash on Delivery</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

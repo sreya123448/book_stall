@@ -1,0 +1,8 @@
+<h2>Choose Payment Method</h2>
+<p>Order Total: ₹{{ order.grand_total }}</p>
+
+<a href="{% url 'orders:razorpay_checkout' %}">Pay with Razorpay</a>
+<a href="{% url 'orders:cod_checkout' %}?type=buy_now" class="btn btn-outline-secondary mt-3">Pay with Cash on Delivery</a>
+
+<div id="paypal-button-container"></div>
+

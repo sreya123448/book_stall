@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice #{{ order.id }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            color: #333;
+        }
+
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #eee;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            background: #fff;
+        }
+
+        .invoice-box table {
+            width: 100%;
+            line-height: 1.6;
+            text-align: left;
+            border-collapse: collapse;
+        }
+
+        .invoice-box table td {
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        .invoice-box table tr.heading td {
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        .invoice-box table tr.item td {
+            border-bottom: 1px solid #eee;
+        }
+
+        .invoice-summary {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .invoice-summary p {
+            margin: 5px 0;
+        }
+
+        .logo {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-muted {
+            color: #888;
+        }
+
+        .title {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <!-- Logo -->
+        <table>
+            <tr>
+                <td><img src="{% static 'images/BOOK_SHORE.png' %}" alt="Logo" class="logo"></td>
+                <td class="text-right">
+                    <div class="title">Invoice</div>
+                    <div><strong>Order #{{ order.id }}</strong></div>
+                    <div class="text-muted">Date: {{ order.created_at|date:"M d, Y" }}</div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Customer Info -->
+        <table style="margin-top: 30px;">
+            <tr>
+                <td>
+                    <strong>Billing To:</strong><br>
+                    {{ order.full_name }}<br>
+                    {{ order.address }}<br>
+                    {{ order.city }}, {{ order.state }} - {{ order.zip_code }}<br>
+                    Phone: {{ order.phone }}
+                </td>
+                <td class="text-right">
+                    <strong>Email:</strong><br>
+                    {{ order.user.email }}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Order Items -->
+        <table style="margin-top: 40px;">
+            <tr class="heading">
+                <td>Book</td>
+                <td>Quantity</td>
+                <td>Unit Price</td>
+                <td>Subtotal</td>
+            </tr>
+
+            {% for item in order.items.all %}
+            <tr class="item">
+                <td>{{ item.book.title }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>₹{{ item.price }}</td>
+                <td>₹{{ item.subtotal }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Totals -->
+        <div class="invoice-summary">
+            <p><strong>Shipping Fee:</strong> ₹{{ order.shipping_fee }}</p>
+            <p><strong>Total:</strong> ₹{{ order.grand_total }}</p>
+        </div>
+    </div>
+</body>
+</html>

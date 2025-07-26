@@ -1,0 +1,57 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="order-success-container">
+  <div class="order-success-card">
+    <div class="order-success-header">
+      <svg class="order-success-icon" viewBox="0 0 24 24">
+        <path fill="#8d6e63" d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" />
+      </svg>
+      <h1 class="order-success-title">Thank you for your order!</h1>
+      <p class="order-success-subtitle">Your order has been confirmed and will be processed shortly</p>
+    </div>
+
+    <div class="order-details">
+      <div class="order-detail-item">
+        <span class="detail-label">Order Number:</span>
+        <span class="detail-value">#{{ order.id }}</span>
+      </div>
+      
+      <div class="order-detail-item">
+        <span class="detail-label">Shipping To:</span>
+        <span class="detail-value">
+          {{ order.full_name }},<br>
+          {{ order.address }},<br>
+          {{ order.city }}, {{ order.state }} - {{ order.zip_code }}
+        </span>
+      </div>
+      
+      <div class="order-detail-item">
+        <span class="detail-label">Payment Method:</span>
+        <span class="detail-value">{{ order.payment_method }}</span>
+      </div>
+      
+      <div class="order-detail-item">
+        <span class="detail-label">Order Total:</span>
+        <span class="detail-value">
+          ₹{{ order.total_price }} (Items)<br>
+          + ₹{{ order.shipping_fee }} (Shipping)<br>
+          <strong class="total-amount">₹{{ order.grand_total }}</strong>
+        </span>
+      </div>
+    </div>
+
+    <div class="order-success-actions">
+      <a href="{% url 'core:shop' %}" class="continue-shopping-btn">
+        <i class="fas fa-arrow-left"></i> Continue Shopping
+      </a>
+      <a href="{% url 'accounts:my_orders' %}" class="view-orders-btn">
+        View My Orders <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

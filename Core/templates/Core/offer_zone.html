@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+<section class="book-section">
+  <h1 class="book-section-title">OFFER ZONE</h1>
+
+    <div class="book-cards">
+        {% for book in offer_books %}
+        <div class="book-card">
+            {% if book.offer_tag %}
+                <span class="book-badge">{{ book.offer_tag }}</span>
+            {% endif %}
+
+            <div class="book-image">
+    <a href="{% url 'core:book_detail' book.id %}">
+        {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+        {% else %}
+            <img src="{% static 'images/default-book.jpg' %}" alt="{{ book.title }}">
+        {% endif %}
+    </a>
+</div>
+            <div class="book-details">
+                <h3 class="book-title">{{ book.title|truncatechars:30 }}</h3>
+                <p class="book-author">by {{ book.author }}</p>
+
+                <div class="book-price">
+                    {% if book.original_price and book.original_price > book.price %}
+                        <span class="current-price-offer text-danger fw-bold">₹{{ book.price }}</span>
+                        <span class="original-price text-muted ms-2"><del>₹{{ book.original_price }}</del></span>
+                        <!-- <span class="discount-badge badge bg-success ms-2">{{ book.discount_percent }}% OFF</span> -->
+                    {% else %}
+                        <span class="current-price-offer">₹{{ book.price }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- <div class="book-actions">
+                <a href="{% url 'core:book_detail' book.id %}" class="action-btn view-btn" title="View details">
+                    <i class="far fa-eye"></i>
+                </a>
+            </div> -->
+        </div>
+        {% empty %}
+        <p>No offers available at this time.</p>
+        {% endfor %}
+    </div>
+</section>
+</div>
+{% endblock %}

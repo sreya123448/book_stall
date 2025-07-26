@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="nexor-orders-container">
+    <div class="nexor-profile-header">
+        <h1 class="nexor-profile-title">Orders</h1>
+        
+        <div class="nexor-profile-nav">
+            <div class="nexor-profile-sidebar">
+                <h3 class="nexor-sidebar-title">My Orders</h3>
+                <ul class="nexor-sidebar-menu">
+                    <li>Customer Care</li>
+                    <li>Saved cards</li>
+                    <li>Pending payments</li>
+                    <li>Gift cards</li>
+                </ul>
+                
+                <div class="nexor-sidebar-divider"></div>
+                
+                <h3 class="nexor-sidebar-title">Home</h3>
+                <ul class="nexor-sidebar-menu">
+                    <li><a href="{% url 'accounts:my_profile' %}" style="color:var(--nav-bg) ;">My Account</a></li>
+                </ul>
+            </div>
+            
+            <div class="nexor-orders-content">
+                <h2 class="nexor-orders-title">My Orders</h2>
+                
+                <div class="nexor-orders-filter">
+                  <div class="nexor-filter-tabs">
+                      <a href="{% url 'accounts:my_orders' %}" class="nexor-filter-tab {% if not status %}nexor-active-tab{% endif %}">All</a>
+                      <a href="?status=in_progress" class="nexor-filter-tab {% if status == 'in_progress' %}nexor-active-tab{% endif %}">In Progress</a>
+                      <a href="?status=delivered" class="nexor-filter-tab {% if status == 'delivered' %}nexor-active-tab{% endif %}">Delivered</a>
+                      <a href="?status=cancelled" class="nexor-filter-tab {% if status == 'cancelled' %}nexor-active-tab{% endif %}">Cancelled</a>
+                  </div>
+                  <div class="nexor-date-filter">
+                      <form method="get">
+                          <label>From: <input type="date" name="start_date" value="{{ request.GET.start_date }}"></label>
+                          <label>To: <input type="date" name="end_date" value="{{ request.GET.end_date }}"></label>
+                          {% if status %}
+                              <input type="hidden" name="status" value="{{ status }}">
+                          {% endif %}
+                          <button type="submit">Apply</button>
+                      </form>
+                  </div>
+              </div>
+
+
+                
+                {% if orders %}
+                    {% for order in orders %}
+                    <div class="nexor-order-card">
+                        <div class="nexor-order-header">
+                            <div>
+                                <strong class="nexor-order-id">Order ID: {{ order.id }}</strong>
+                                <p class="nexor-order-items">
+                                    {% for item in order.items.all|slice:":3" %}
+                                     <img src="{% if item.book.cover_image %}{{ item.book.cover_image.url }}{% else %}{% static 'images/default-book.jpg' %}{% endif %}" 
+                                        alt="{{ item.book.title }}" 
+                                        class="nexor-order-thumbnail">
+                                        {{ item.book.title }}{% if not forloop.last %} | {% endif %}
+                                    {% endfor %}
+                                    {% if order.items.count > 3 %} & {{ order.items.count|add:"-3" }} more items{% endif %}
+                                </p>
+                            </div>
+                            <div class="nexor-order-price">₹ {{ order.grand_total }}</div>
+                        </div>
+                        
+                        <div class="nexor-order-status">
+                            <span class="nexor-status-badge">{{ order.status }}</span>
+                            <span class="nexor-status-date">
+                                {% if order.status == "Delivered" %}
+                                    Delivered on {{ order.updated_at|date:"d M Y" }}
+                                {% else %}
+                                    Ordered on {{ order.created_at|date:"d M Y" }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="nexor-order-actions">
+                            <a href="{% url 'accounts:order_details' order.id %}" class="nexor-action-link">View Details</a>
+                            <a href="{% url 'accounts:invoice_pdf' order.id %}" class="nexor-action-link">Download Invoice</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="nexor-empty-state">You haven't placed any orders yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+/* Profile Layout */
+.nexor-order-thumbnail {
+    width: 60px;
+    height: 75px;
+    object-fit: cover;
+    margin-right: 6px;
+    vertical-align: middle;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.nexor-orders-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Header */
+.nexor-profile-title {
+  font-size: 2.2rem;
+  color: var(--nav-bg);
+  font-weight: bold;
+  border-bottom: 2px solid var(--medium-bg);
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Profile Navigation */
+.nexor-profile-nav {
+  display: flex;
+  gap: 2rem;
+}
+
+/* Sidebar */
+.nexor-profile-sidebar {
+  width: 260px;
+  padding: 1.5rem;
+  background: linear-gradient(to bottom, var(--light-bg), var(--medium-bg));
+  border-radius: var(--radius);
+}
+
+.nexor-sidebar-title {
+  color: var(--nav-bg);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.nexor-sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.nexor-sidebar-menu li {
+  padding: 0.6rem 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+
+.nexor-sidebar-menu li:hover,
+.nexor-sidebar-menu .nexor-active-menu {
+  color: var(--button-bg);
+  font-weight: 600;
+}
+
+.nexor-sidebar-divider {
+  height: 1px;
+  background-color: var(--accent-bg);
+  margin: 1.5rem 0;
+}
+
+/* Orders Area */
+.nexor-orders-content {
+  flex: 1;
+}
+
+.nexor-orders-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--nav-bg);
+  margin-bottom: 1.5rem;
+}
+
+/* Filters */
+.nexor-orders-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--medium-bg);
+  padding-bottom: 1rem;
+}
+
+.nexor-filter-tabs {
+  display: flex;
+  gap: 1rem;
+}
+
+.nexor-filter-tab {
+  padding: 0.5rem 1.2rem;
+  background-color: var(--light-bg);
+  border: 1px solid var(--medium-bg);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.nexor-filter-tab:hover {
+  background: var(--accent-bg);
+  color: var(--text-light);
+}
+
+.nexor-active-tab {
+  background-color: var(--nav-bg);
+  color: var(--text-light);
+}
+
+.nexor-date-filter {
+  color: var(--accent-bg);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* Order Cards */
+.nexor-order-card {
+  border: 1px solid var(--medium-bg);
+  border-left: 5px solid var(--nav-bg);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: white;
+  transition: var(--transition);
+}
+
+.nexor-order-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.nexor-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.nexor-order-id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--nav-bg);
+}
+
+.nexor-order-items {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.nexor-order-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--nav-bg);
+}
+
+/* Order Status */
+.nexor-order-status {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.nexor-status-badge {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 20px;
+  font-weight: 500;
+  background: var(--light-bg);
+  text-transform: uppercase;
+}
+
+.nexor-status-badge:before {
+  content: "● ";
+  font-size: 0.8rem;
+}
+
+.nexor-status-badge:contains("Delivered") {
+  color: green;
+}
+
+.nexor-status-badge:contains("Cancelled") {
+  color: red;
+}
+
+.nexor-status-badge:contains("In Progress") {
+  color: orange;
+}
+
+.nexor-status-date {
+  font-size: 0.85rem;
+  color: var(--secondary-bg);
+}
+
+/* Actions */
+.nexor-order-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.nexor-action-link {
+  font-size: 0.9rem;
+  color: var(--accent-bg);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.nexor-action-link:hover {
+  color: var(--nav-bg);
+  text-decoration: underline;
+}
+
+/* Empty */
+.nexor-empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--medium-bg);
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nexor-profile-nav {
+    flex-direction: column;
+  }
+
+  .nexor-profile-sidebar {
+    width: 100%;
+  }
+
+  .nexor-orders-filter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .nexor-order-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .nexor-order-status {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tabs = document.querySelectorAll('.nexor-filter-tab');
+    const orders = document.querySelectorAll('.order-card');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            // Remove active state
+            tabs.forEach(t => t.classList.remove('nexor-active-tab'));
+            this.classList.add('nexor-active-tab');
+
+            const status = this.getAttribute('data-status');
+
+            orders.forEach(order => {
+                const orderStatus = order.getAttribute('data-status'); // Add this to each order card
+
+                if (status === 'all' || status === orderStatus) {
+                    order.style.display = '';
+                } else {
+                    order.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+
+{% endblock %}

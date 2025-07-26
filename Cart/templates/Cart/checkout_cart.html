@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="buynow-container">
+  <div class="buynow-header">
+    <h2 class="buynow-checkout-title">Cart-Complete Your Purchase</h2>
+    <div class="buynow-steps">
+      <div class="buynow-step active">1. Shipping</div>
+      <div class="buynow-step">2. Payment</div>
+      <div class="buynow-step">3. Confirmation</div>
+    </div>
+  </div>
+
+  <div class="buynow-grid">
+    <div class="buynow-form-section">
+      {% if form.errors %}
+        <div class="buynow-errorlist">
+          <strong>Please correct the following errors:</strong>
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <form method="post" id="buynow-orderForm" class="buynow-form" novalidate>
+        {% csrf_token %}
+
+        <!-- <div class="buynow-form-section">
+          <h3 class="buynow-section-title"><i class="fas fa-user"></i> Contact Information</h3>
+          <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+          <p><strong>Email:</strong> {{ user.email }}</p>
+        </div> -->
+
+        <div class="buynow-form-section">
+          <h3 class="buynow-section-title"><i class="fas fa-truck"></i> Shipping Address</h3>
+
+          <div class="buynow-address-grid">
+  {% for address in shipping_addresses %}
+    <label class="buynow-address-radio-card {% if address == default_address %}selected{% endif %}">
+      <input type="radio" name="selected_address" value="{{ address.id }}" 
+             {% if address == default_address %}checked{% endif %} class="buynow-address-radio">
+      
+      <div class="buynow-radio-indicator"></div>
+      
+      <div class="buynow-address-content">
+        <p class="buynow-address-name">{{ address.full_name }}</p>
+        <p class="buynow-address-line">{{ address.address }}</p>
+        <p class="buynow-address-city">{{ address.city }}, {{ address.state }} {{ address.zip_code }}</p>
+        <p class="buynow-address-phone">Phone: {{ address.phone }}</p>
+      </div>
+    </label>
+  {% endfor %}
+</div>
+
+
+          <div class="buynow-toggle-container">
+            <label class="buynow-toggle">
+              {{ form.use_different_shipping }}
+              <span class="buynow-toggle-slider"></span>
+            </label>
+            <span class="buynow-toggle-label">Use different shipping address</span>
+          </div>
+
+          <div id="buynow-alt-shipping" class="buynow-hidden">
+            <div class="buynow-form-group">
+              <label for="id_alt_full_name">Full Name</label>
+              {{ form.alt_full_name }}
+            </div>
+            <div class="buynow-form-group">
+              <label for="id_alt_phone">Phone Number</label>
+              {{ form.alt_phone }}
+            </div>
+            <div class="buynow-form-group">
+              <label for="id_alt_address">Address</label>
+              {{ form.alt_address }}
+            </div>
+            <div class="buynow-form-row">
+              <div class="buynow-form-group">
+                <label for="id_alt_city">City</label>
+                {{ form.alt_city }}
+              </div>
+              <div class="buynow-form-group">
+                <label for="id_alt_state">State</label>
+                {{ form.alt_state }}
+              </div>
+              <div class="buynow-form-group">
+                <label for="id_alt_zip_code">ZIP Code</label>
+                {{ form.alt_zip_code }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="buynow-form-section">
+          <h3 class="buynow-section-title"><i class="fas fa-credit-card"></i> Payment Method</h3>
+          <div class="buynow-payment-options">
+            {% for value, name in form.payment_method.field.choices %}
+              <div class="buynow-payment-option">
+                <input type="radio" id="payment_{{ value }}" name="payment_method" value="{{ value }}"
+                       {% if form.payment_method.value == value %}checked{% endif %}>
+                <label for="payment_{{ value }}">
+                  <div class="buynow-payment-content">
+                    <div class="buynow-payment-icon">
+                      {% if value == 'credit_card' %}
+                        <i class="far fa-credit-card"></i>
+                      {% elif value == 'paypal' %}
+                        <i class="fab fa-cc-paypal"></i>
+                      {% elif value == 'bank_transfer' %}
+                        <i class="fas fa-university"></i>
+                      {% else %}
+                        <i class="fas fa-money-bill-wave"></i>
+                      {% endif %}
+                    </div>
+                    <div class="buynow-payment-details">
+                      <span class="buynow-payment-name">{{ name }}</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="buynow-summary-section">
+      <div class="buynow-summary-card">
+        <h3 class="buynow-summary-title">Order Summary</h3>
+        {% for item in cart_items %}
+      <div class="buynow-book-item">
+<img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}" class="buynow-book-cover">
+        <div class="buynow-book-info">
+          <h4>{{ item.book.title }}</h4>
+          <p>by {{ item.book.author }}</p>
+          <div class="buynow-book-price">₹{{ item.book.price }} x {{ item.quantity }}</div>
+        </div>
+      </div>
+    {% endfor %}
+
+        <div class="buynow-summary-details">
+          <div class="buynow-summary-row">
+            <span>Subtotal</span>
+            <span>₹{{ subtotal }}</span>
+          </div>
+          <div class="buynow-summary-row">
+            <span>Shipping</span>
+            <span>₹{{ shipping_fee }}</span>
+          </div>
+          <div class="buynow-summary-row buynow-total">
+            <span>Total</span>
+            <span>₹{{ grand_total }}</span>
+          </div>
+        </div>
+
+        <button type="submit" form="buynow-orderForm" class="buynow-submit-btn">
+          Place Your Order <i class="fas fa-lock"></i>
+        </button>
+
+        <div class="buynow-security-info">
+          <i class="fas fa-shield-alt"></i>
+          <span>Secure checkout. Your information is protected.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Optional Spinner Modal (optional copy from buynow if needed) -->
+
+<div id="buynow-loadingModal" class="buynow-modal-overlay">
+  <div class="buynow-loading-box">
+    <div class="buynow-spinner-container">
+      <div class="buynow-spinner"></div>
+    </div>
+    <p class="buynow-loading-text">Processing Your Order</p>
+    <p class="buynow-loading-subtext">Please wait while we confirm your payment details</p>
+    <div class="buynow-progress-container">
+      <div class="buynow-progress-bar"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Modal & Spinner Styles */
+.buynow-modal-overlay {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+}
+
+.buynow-modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.buynow-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #d7ccc8;
+  border-top: 5px solid #8d6e63;
+  border-radius: 50%;
+  animation: spin 2s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.buynow-hidden {
+  display: none;
+}
+
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const checkbox = document.querySelector("#id_use_different_shipping");
+  const altSection = document.getElementById("buynow-alt-shipping");
+
+  function toggleAltFields() {
+    if (checkbox.checked) {
+      altSection.classList.remove("buynow-hidden");
+    } else {
+      altSection.classList.add("buynow-hidden");
+    }
+  }
+
+  if (checkbox) {
+    toggleAltFields();
+    checkbox.addEventListener("change", toggleAltFields);
+  }
+});
+
+
+</script>
+<script>
+  function selectAddress(addressId) {
+  // Find the radio input for this address
+  const radioInput = document.querySelector(`input[name="selected_address"][value="${addressId}"]`);
+  
+  if (radioInput) {
+    // Mark as checked
+    radioInput.checked = true;
+    
+    // Update UI
+    document.querySelectorAll('.buynow-address-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+    
+    radioInput.closest('.buynow-address-card').classList.add('selected');
+    
+    // Optional: Scroll to show the selected address
+    radioInput.closest('.buynow-address-card').scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  }
+}
+</script>
+
+<!-- Font Awesome (for icons) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}

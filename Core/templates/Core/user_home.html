@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <!-- Welcome Banner / Hero Section -->
+<div class="fullwidth-welcome-banner">
+  <div class="welcome-content">
+    <div class="text-section">
+      <h2 class="guide-title">Ultimate Guide</h2>
+<h1 class="main-heading">Welcome, {{ request.user.first_name }} {{ request.user.last_name|default:'' }}</h1>
+      <p class="description">
+        Dive back into your reading journey — we've got fresh picks waiting just for you!
+      </p>
+      <div class="banner-buttons">
+        <a href="{% url 'cart:view_wishlist' %}" class="btn secondary">View Wishlist</a>
+      </div>
+    </div>
+    <div class="graphic-section">
+      <div class="welcome-box">
+        <span>WELCOME</span>
+        <i class="fas fa-bullhorn speaker-icon"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+   <!-- Categories Section -->
+   <section class="book-section">
+    <div class="section-header">
+        <h2 class="section-title">Top Categories</h2>
+        <a href="{% url 'core:shop' %}" class="view-more">View All →</a>
+    </div>
+    <div class="category-scroller">
+        <div class="category-cards">
+            {% for category in categories %}
+            <a href="{% url 'core:category' category.id %}" class="category-card">
+                <div class="category-icon">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                    {% else %}
+                    <span>📚</span>
+                    {% endif %}
+                </div>
+                <h3 class="category-name">{{ category.name }}</h3>
+                <p class="book-count">{{ category.books.count }} books</p>
+            </a>
+            {% empty %}
+            <p>No categories available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+<!-- banner -->
+
+<section class="banner-section">
+    <div class="banner-row">
+        {% for banner in banners|slice:":2" %}
+        <!-- <a href="{{ banner.link }}" class="banner-box"> -->
+            <a href="{% url 'core:shop' %}" class="banner-box">
+            <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
+        </a>
+        {% endfor %}
+    </div>
+</section>  
+
+    <!-- New Arrivals Section -->
+    <section class="book-section">
+        <div class="section-header">
+            <h2 class="section-title">New Arrivals</h2>
+            <a href="{% url 'core:shop' %}?sort=newest" class="view-more">View More →</a>
+        </div>
+        <div class="book-cards">
+            {% for book in new_arrivals|slice:":8" %}
+            <div class="book-card">
+                <span class="book-badge">New</span>
+                <div class="book-image">
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+                    {% else %}
+                    <img src="{% static 'images/default-book.jpg' %}" alt="{{ book.title }}">
+                    {% endif %}
+                </div>
+                <div class="book-details">
+                    <h3 class="book-title">{{ book.title|truncatechars:30 }}</h3>
+                    <p class="book-author">by {{ book.author }}</p>
+                    <div class="book-price">
+                        <span class="current-price">${{ book.price }}</span>
+                    </div>
+                </div>
+                <div class="book-actions">
+                    {% if not request.user.is_authenticated %}
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="action-btn wishlist-btn" title="Login to add to wishlist">
+                        <i class="far fa-heart"></i>
+                    </a>
+                    {% else %}
+                        <form method="post" action="{% url 'cart:add_to_wishlist' book.id %}" class="wishlist-form">
+        {% csrf_token %}
+        <button type="submit" class="action-btn wishlist-btn" title="Add to wishlist">
+            <i class="far fa-heart"></i>
+        </button>
+    </form>
+                    {% endif %}
+                    <a href="{% url 'core:book_detail' book.id %}" class="action-btn view-btn" title="View details">
+                        <i class="far fa-eye"></i>
+                    </a>
+                   {% if not request.user.is_authenticated %}
+                        <a href="{% url 'login' %}?next={% url 'cart:view_cart' %}" class="action-btn cart-btn" title="Login to add to cart">
+                            <i class="fas fa-shopping-cart"></i>
+                        </a>
+                        {% else %}
+                        <form method="post" action="{% url 'cart:add_to_cart' book.id %}" class="cart-form">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn cart-btn" title="Add to cart">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p>No new arrivals at this time.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+
+    <!-- Offer Zone Section -->
+<section class="book-section">
+    <div class="section-header">
+        <h2 class="section-title">🔥 Offer Zone</h2>
+    </div>
+    <div class="book-cards">
+        {% for book in offer_books %}
+        <div class="book-card">
+            {% if book.offer_tag %}
+                <span class="book-badge">{{ book.offer_tag }}</span>
+            {% endif %}
+
+            <div class="book-image">
+    <a href="{% url 'core:book_detail' book.id %}">
+        {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+        {% else %}
+            <img src="{% static 'images/default-book.jpg' %}" alt="{{ book.title }}">
+        {% endif %}
+    </a>
+</div>
+            <div class="book-details">
+                <h3 class="book-title">{{ book.title|truncatechars:30 }}</h3>
+                <p class="book-author">by {{ book.author }}</p>
+
+                <div class="book-price">
+                    {% if book.original_price and book.original_price > book.price %}
+                        <span class="current-price-offer text-danger fw-bold">₹{{ book.price }}</span>
+                        <span class="original-price text-muted ms-2"><del>₹{{ book.original_price }}</del></span>
+                        <!-- <span class="discount-badge badge bg-success ms-2">{{ book.discount_percent }}% OFF</span> -->
+                    {% else %}
+                        <span class="current-price-offer">₹{{ book.price }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- <div class="book-actions">
+                <a href="{% url 'core:book_detail' book.id %}" class="action-btn view-btn" title="View details">
+                    <i class="far fa-eye"></i>
+                </a>
+            </div> -->
+        </div>
+        {% empty %}
+        <p>No offers available at this time.</p>
+        {% endfor %}
+    </div>
+</section>
+
+
+
+    <!-- Trending Section -->
+    <section class="book-section">
+        <div class="section-header">
+            <h2 class="section-title">Trending Now</h2>
+            <a href="{% url 'core:trending' %}?sort=popular" class="view-more">View More →</a>
+        </div>
+        <div class="book-cards">
+            {% for book in now_trending|slice:":8" %}
+            <div class="book-card">
+                {% if book.stock > 50 %}
+                <span class="book-badge">Popular</span>
+                {% endif %}
+                <div class="book-image">
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+                    {% else %}
+                    <img src="{% static 'images/default-book.jpg' %}" alt="{{ book.title }}">
+                    {% endif %}
+                </div>
+                <div class="book-details">
+                    <h3 class="book-title">{{ book.title|truncatechars:30 }}</h3>
+                    <p class="book-author">by {{ book.author }}</p>
+                    <div class="book-price">
+                        <span class="current-price">${{ book.price }}</span>
+                    </div>
+                </div>
+                <div class="book-actions">
+                    {% if not request.user.is_authenticated %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="action-btn wishlist-btn" title="Login to add to wishlist">
+                            <i class="far fa-heart"></i>
+                        </a>
+                        {% else %}
+                        <form method="post" action="{% url 'cart:add_to_wishlist' book.id %}" class="wishlist-form">
+    {% csrf_token %}
+    <button type="submit" class="action-btn wishlist-btn" title="Add to wishlist">
+        <i class="far fa-heart"></i>
+    </button>
+</form>
+                        {% endif %}
+                    <a href="{% url 'core:book_detail' book.id %}" class="action-btn view-btn" title="View details">
+                        <i class="far fa-eye"></i>
+                    </a>
+                   {% if not request.user.is_authenticated %}
+                    <a href="{% url 'login' %}?next={% url 'cart:view_cart' %}" class="action-btn cart-btn" title="Login to add to cart">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    {% else %}
+                    <form method="post" action="{% url 'cart:add_to_cart' book.id %}" class="cart-form">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn cart-btn" title="Add to cart">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p>No trending books at this time.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Featured Books Section -->
+    <section class="book-section">
+        <div class="section-header">
+            <h2 class="section-title">Featured Books</h2>
+            <a href="{% url 'core:shop' %}?featured=true" class="view-more">View More →</a>
+        </div>
+        <div class="book-cards">
+            {% for book in featured_books|slice:":5" %}
+            <div class="book-card">
+                <span class="book-badge">Featured</span>
+                <div class="book-image">
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+                    {% else %}
+                    <img src="{% static 'images/default-book.jpg' %}" alt="{{ book.title }}">
+                    {% endif %}
+                </div>
+                <div class="book-details">
+                    <h3 class="book-title">{{ book.title|truncatechars:30 }}</h3>
+                    <p class="book-author">by {{ book.author }}</p>
+                    <div class="book-price">
+                        <span class="current-price">${{ book.price }}</span>
+                    </div>
+                </div>
+                <div class="book-actions">
+                    {% if not request.user.is_authenticated %}
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="action-btn wishlist-btn" title="Login to add to wishlist">
+                        <i class="far fa-heart"></i>
+                    </a>
+                    {% else %}
+                    <form method="post" action="{% url 'cart:add_to_wishlist' book.id %}" class="wishlist-form">
+    {% csrf_token %}
+    <button type="submit" class="action-btn wishlist-btn" title="Add to wishlist">
+        <i class="far fa-heart"></i>
+    </button>
+</form>
+                    {% endif %}
+                    <a href="{% url 'core:book_detail' book.id %}" class="action-btn view-btn" title="View details">
+                        <i class="far fa-eye"></i>
+                    </a>
+                    {% if not request.user.is_authenticated %}
+                        <a href="{% url 'login' %}?next={% url 'cart:view_cart' %}" class="action-btn cart-btn" title="Login to add to cart">
+                            <i class="fas fa-shopping-cart"></i>
+                        </a>
+                        {% else %}
+                        <form method="post" action="{% url 'cart:add_to_cart' book.id %}" class="cart-form">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn cart-btn" title="Add to cart">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p>No featured books at this time.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+   
+
+<!-- About Section -->
+<div class="about">
+    <div class="about_image">
+        <img src="{% static 'images/about2.jpg' %}">
+    </div>
+    <div class="about_tag">
+        <h1>About Us</h1>
+        <p>At Book Shore, we believe that books are more than just pages and ink — they are gateways to new worlds,
+           fresh ideas, and lifelong memories. Whether you're a lifelong reader, a casual page-turner, or 
+           just starting your literary journey, our goal is to offer a curated space for discovery, inspiration, and connection.
+          We offer a wide variety of books across all genres — from timeless classics and bestselling fiction to insightful non-fiction, 
+          children's favorites, and niche treasures.
+           With both physical and digital formats available, we aim to make reading accessible anytime, anywhere.</p>
+        <a href="{% url 'core:about' %}" class="about_btn">Learn More</a>
+    </div>
+</div>
+</div>
+<script>
+    document.querySelectorAll('.wishlist-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            this.classList.toggle('active');
+            if (this.classList.contains('active')) {
+                this.innerHTML = '<i class="fas fa-heart"></i>';
+            } else {
+                this.innerHTML = '<i class="far fa-heart"></i>';
+            }
+        });
+    });
+
+    document.querySelectorAll('.cart-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const bookCard = this.closest('.book-card');
+            const bookTitle = bookCard.querySelector('.book-title').textContent;
+            console.log('Added to cart: ' + bookTitle);
+        });
+    });
+</script>
+
+
+{% endblock %}

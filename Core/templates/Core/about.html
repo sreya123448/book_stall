@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+  <div class="bookstore-container">
+    
+    <!-- About Us Section -->
+    <section class="bookstore-about-section">
+      <h1 class="book-about-title">About Us</h1>
+      <p>
+        Welcome to <strong>Book Shore</strong> – a curated haven for passionate readers. 
+        Whether you're searching for timeless classics or hidden indie gems, our mission is to help you discover books that linger long after the last page.
+      </p>
+      <p>
+        Founded in 2023 by book lovers, we believe every story deserves a home. 
+        With thoughtfully selected titles and a love for storytelling, we’re here to fuel your literary adventures.
+      </p>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section class="bookstore-contact-section">
+      <h2>Contact Us</h2>
+      <p>Questions? Feedback? We’d love to hear from you!</p>
+      <ul class="bookstore-contact-list">
+        <li><strong>Email:</strong> <a href="mailto:support@leafandlore.com">support@leafandlore.com</a></li>
+        <li><strong>Phone:</strong> +1-234-567-8901</li>
+        <li><strong>Location:</strong> 123 Book Lane, Thrissur, Kerala</li>
+      </ul>
+
+      <form method="post" class="bookstore-contact-form">
+  {% csrf_token %}
+
+  <label for="id_name">Name</label>
+  {{ form.name }}
+
+  <label for="id_email">Email</label>
+  {{ form.email }}
+
+  <label for="id_phone">Phone</label>
+  {{ form.phone }}
+
+  <label for="id_message">Message</label>
+  {{ form.message }}
+
+  <button type="submit" class="bookstore-btn-primary">Send Message</button>
+</form>
+    </section>
+
+  </div>
+
+{% endblock %}

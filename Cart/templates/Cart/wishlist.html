@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="wishlist-hero">
+    <h1 class="wishlist-title">Your Wishlist</h1>
+    <div class="wishlist-decoration">
+        <div class="decoration-circle"></div>
+        <div class="decoration-square"></div>
+        <div class="decoration-triangle"></div>
+    </div>
+</div>
+<div class="container">
+
+<div class="wishlist-content">
+    {% if wishlist_items %}
+        <div class="wishlist-grid">
+            {% for item in wishlist_items %}
+            <div class="wishlist-card">
+                <div class="wishlist-card-header">
+                    {% if item.book.cover_image %}
+                        <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}" class="wishlist-card-image">
+                    {% else %}
+                        <img src="{% static 'images/default-book.jpg' %}" alt="No image" class="wishlist-card-image">
+                    {% endif %}
+                    <div class="wishlist-card-badge">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                </div>
+                
+                <div class="wishlist-card-body">
+                    <h3 class="wishlist-card-title">{{ item.book.title }}</h3>
+                    <p class="wishlist-card-author">{{ item.book.author }}</p>
+                    <div class="wishlist-card-price">${{ item.book.price|floatformat:2 }}</div>
+                </div>
+                
+                <div class="wishlist-card-footer">
+                    <a href="{% url 'cart:add_to_cart' item.book.id %}" class="wishlist-card-btn cart-btn">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </a>
+                    <a href="{% url 'cart:remove_from_wishlist' item.id %}" class="wishlist-card-btn remove-btn">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-wishlist">
+            <div class="empty-wishlist-icon">
+             
+             <i class="fas fa-heart-broken"></i>
+
+            </div>
+            <h3 class="empty-wishlist-title">Your Literary Dreams Await</h3>
+            <p class="empty-wishlist-text">Your wishlist is currently empty. Start collecting your favorite reads!</p>
+            <a href="{% url 'core:shop' %}" class="empty-wishlist-btn">Explore Books</a>
+        </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

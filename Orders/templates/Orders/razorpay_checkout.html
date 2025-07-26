@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Checkout</title>
+</head>
+<body>
+    <h2>Pay ₹{{ order.total_price|floatformat:2 }} + ₹{{ order.shipping_fee|floatformat:2 }} (Shipping)</h2>
+
+    <form action="{{ callback_url }}" method="POST">
+        {% csrf_token %}
+        <script
+            src="https://checkout.razorpay.com/v1/checkout.js"
+            data-key="{{ razorpay_key }}"
+            data-amount="{{ amount }}"
+            data-currency="INR"
+            data-order_id="{{ razorpay_order_id }}"
+            data-buttontext="Pay with Razorpay"
+            data-name="BookStore"
+            data-description="Complete your purchase"
+            data-image="{% static 'logo.png' %}"
+            data-prefill.name="{{ request.user.first_name }}"
+            data-prefill.email="{{ request.user.email }}"
+            data-theme.color="#3399cc">
+        </script>
+    </form>
+</body>
+</html>

@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/book_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="book-detail-container">
+  <div class="breadcrumb">
+    <a href="{% url 'core:index' %}">Home</a> &gt; 
+    <a href="{% url 'core:shop' %}">Shop</a> &gt; 
+    <span>{{ book.title|truncatechars:30 }}</span>
+  </div>
+
+  <div class="book-detail-wrapper">
+    <div class="book-image-section">
+      {% if book.cover_image %}
+        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="main-book-image" id="mainBookImage">
+      {% else %}
+        <img src="{% static 'images/no_cover.png' %}" alt="No cover available" class="main-book-image" id="mainBookImage">
+      {% endif %}
+      
+      <div class="share-buttons">
+        <span>Share:</span>
+        <a href="#" class="social-share facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-share twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-share whatsapp"><i class="fab fa-whatsapp"></i></a>
+      </div>
+    </div>
+
+    <div class="book-info-section">
+      <h1 class="book-title-book">{{ book.title }}</h1>
+      {% if book.stock == 0 or not book.available %}
+  <span class="badge bg-secondary text-white">Sold Out</span>
+{% endif %}
+      <p class="book-author">by {{ book.author }}</p>
+
+      {% if is_offer_valid %}
+  <div class="offer-badge mb-2">
+    <span class="badge bg-danger"><i class="fas fa-tag"></i> Offer Active</span>
+    {% if book.offer_tag %}
+      <span class="badge bg-warning text-dark ms-2">{{ book.offer_tag }}</span>
+    {% endif %}
+  </div>
+{% endif %}
+      
+      <div class="rating-section">
+        <div class="stars">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="far fa-star"></i>
+          <span>(12 reviews)</span>
+        </div>
+      </div>
+      
+   <div class="price-section mt-2">
+  {% if book.original_price and book.original_price > book.price and is_offer_valid %}
+    <span class="current-price text-danger fw-bold">₹{{ book.price }}</span>
+    <span class="original-price text-muted ms-2"><del>₹{{ book.original_price }}</del></span>
+    <span class="discount badge bg-success ms-2">{{ discount_percent }}% OFF</span>
+  {% else %}
+    <span class="current-price">₹{{ book.price }}</span>
+  {% endif %}
+</div>
+      
+      <div class="availability">
+        {% if book.available %}
+          <span class="in-stock"><i class="fas fa-check-circle"></i> In Stock ({{ book.stock }} available)</span>
+        {% else %}
+          <span class="out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</span>
+        {% endif %}
+      </div>
+      
+      <div class="action-buttons">
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'cart:add_to_cart' book.id %}" class="add-to-cart-form">
+            {% csrf_token %}
+            <div class="quantity-selector">
+              <button type="button" class="qty-minus">-</button>
+              <input type="number" name="quantity" value="1" min="1" max="{{ book.stock }}" class="qty-input">
+              <button type="button" class="qty-plus">+</button>
+            </div>
+            <button type="submit" class="btn-add-to-cart">
+              <i class="fas fa-shopping-cart"></i> ADD TO CART
+            </button>
+          </form>
+   <a href="{% url 'orders:checkout_buynow' book.id %}?quantity=1" class="btn-buy-now" id="buyNowButton">
+  <i class="fas fa-bolt"></i> BUY NOW
+</a>
+        {% else %}
+          <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn-add-to-cart">
+            <i class="fas fa-shopping-cart"></i> ADD TO CART
+          </a>
+          <a href="{% url 'accounts:register' %}?next={{ request.path }}" class="btn-buy-now">
+            <i class="fas fa-bolt"></i> BUY NOW
+          </a>
+        {% endif %}
+        
+        <a href="{% url 'cart:add_to_wishlist' book.id %}" class="btn-wishlist">
+  <i class="far fa-heart"></i> WISHLIST
+</a>
+      </div>
+      
+      <div class="delivery-info">
+        <p><i class="fas fa-truck"></i> Delivery in 3-5 working days</p>
+        <p><i class="fas fa-undo"></i> 7 days easy return</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="book-details-tabs">
+    <ul class="tabs-nav">
+      <li class="active" data-tab="description">Description</li>
+      <li data-tab="details">Details</li>
+      <li data-tab="reviews">Reviews</li>
+    </ul>
+    
+    <div class="tabs-content">
+      <div id="description" class="tab-pane active">
+        <h3>Book Description</h3>
+        <p>{{ book.description|linebreaks }}</p>
+      </div>
+      
+      <div id="details" class="tab-pane">
+        <h3>Product Details</h3>
+        <table class="book-details-table">
+          <tr>
+            <th>Publisher</th>
+            <td>{{ book.publisher }}</td>
+          </tr>
+          <tr>
+            <th>Published Date</th>
+            <td>{{ book.publishing_date }}</td>
+          </tr>
+          <tr>
+            <th>Edition</th>
+            <td>{{ book.edition }}</td>
+          </tr>
+          <tr>
+            <th>Pages</th>
+            <td>{{ book.number_of_pages }}</td>
+          </tr>
+          <tr>
+            <th>Language</th>
+            <td>{{ book.language }}</td>
+          </tr>
+          <tr>
+            <th>Categories</th>
+            <td>
+              {% for category in book.categories.all %}
+                {{ category.name }}{% if not forloop.last %}, {% endif %}
+              {% empty %}None{% endfor %}
+            </td>
+          </tr>
+          <tr>
+            <th>ISBN</th>
+            <td>{{ book.isbn|default:"Not available" }}</td>
+          </tr>
+        </table>
+      </div>
+      
+      <div id="reviews" class="tab-pane">
+        <h3>Customer Reviews</h3>
+        <div class="review-form">
+          <h4>Write a Review</h4>
+         {% if user.is_authenticated %}
+         <form method="post" action="{% url 'core:book_detail' book.id %}">
+           {% csrf_token %}
+            <div class="form-group">
+              <label>Rating</label>
+              <div class="rating-input">
+                <i class="far fa-star" data-rating="1"></i>
+                <i class="far fa-star" data-rating="2"></i>
+                <i class="far fa-star" data-rating="3"></i>
+                <i class="far fa-star" data-rating="4"></i>
+                <i class="far fa-star" data-rating="5"></i>
+                <input type="hidden" name="rating" id="ratingValue">
+              </div>
+            </div>
+            <div class="form-group">
+              <textarea name="content" placeholder="Write your review here..." class="review-textarea"></textarea>
+            </div>
+            <button type="submit" class="btn-submit-review">Submit Review</button>
+          </form>
+          {% else %}
+        <div class="review-login-prompt">
+          <div class="login-message">
+              <i class="fas fa-lock"></i>
+              <p>Please <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="login-link">login</a> to write a review.</p>
+          </div>
+      </div>
+        {% endif %}
+        </div>
+        
+<div class="reviews-list">
+  {% for review in reviews %}
+    <div class="review-item">
+      <div class="reviewer-info">
+        <span class="reviewer-name">{{ review.user.email }}</span>
+       <div class="review-rating">
+  {% for i in "12345" %}
+    {% if forloop.counter <= review.rating %}
+      <i class="fas fa-star"></i>
+    {% else %}
+      <i class="far fa-star"></i>
+    {% endif %}
+  {% endfor %}
+</div>
+
+
+      </div>
+      <div class="review-content">
+        <p>{{ review.text }}</p>
+      </div>
+      <div class="review-date">Reviewed on {{ review.created_at|date:"F j, Y" }}</div>
+    </div>
+  {% empty %}
+    <p>No reviews yet. Be the first to review this book!</p>
+  {% endfor %}
+</div>
+
+
+      </div>
+    </div>
+  </div>
+  
+  {% if related_books %}
+  <div class="related-books">
+    <h2>You May Also Like</h2>
+    <div class="related-books-slider">
+      {% for related_book in related_books %}
+        <div class="related-book-item">
+          <a href="{% url 'core:book_detail' related_book.id %}">
+            {% if related_book.cover_image %}
+              <img src="{{ related_book.cover_image.url }}" alt="{{ related_book.title }}">
+            {% else %}
+              <img src="{% static 'images/no_cover.png' %}" alt="No cover available">
+            {% endif %}
+            <h3>{{ related_book.title|truncatechars:30 }}</h3>
+            <p class="related-book-author">{{ related_book.author }}</p>
+            <p class="related-book-price">₹{{ related_book.price }}</p>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+
+</div>
+<script src="{% static 'js/quantity.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const qtyInput = document.querySelector(".qty-input");
+    const buyNowButton = document.getElementById("buyNowButton");
+
+    if (qtyInput && buyNowButton) {
+        buyNowButton.addEventListener("click", function (e) {
+            e.preventDefault(); // Prevent immediate navigation
+
+            const quantity = qtyInput.value || 1;
+            const bookId = "{{ book.id }}";  // ✅ Move this line up
+            const fullUrl = `/Orders/checkout_buynow/${bookId}/?quantity=${quantity}`;
+
+            window.location.href = fullUrl;
+        });
+    }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const stars = document.querySelectorAll(".rating-input i");
+  const ratingInput = document.getElementById("ratingValue");
+
+  stars.forEach(star => {
+    star.addEventListener("click", function () {
+      const rating = this.getAttribute("data-rating");
+      ratingInput.value = rating;
+
+      stars.forEach(s => {
+        s.classList.remove("fas");
+        s.classList.add("far");
+      });
+      for (let i = 0; i < rating; i++) {
+        stars[i].classList.remove("far");
+        stars[i].classList.add("fas");
+      }
+    });
+  });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const tabs = document.querySelectorAll(".tabs-nav li");
+  const tabPanes = document.querySelectorAll(".tab-pane");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", function () {
+      // Remove 'active' from all tabs and tab panes
+      tabs.forEach(t => t.classList.remove("active"));
+      tabPanes.forEach(pane => pane.classList.remove("active"));
+
+      // Add 'active' to the clicked tab and corresponding pane
+      this.classList.add("active");
+      const selectedTab = this.getAttribute("data-tab");
+      document.getElementById(selectedTab).classList.add("active");
+    });
+  });
+});
+</script>
+<style>
+  .out-of-stock {
+    display: inline-flex;
+    align-items: center;
+    background-color: #ffe5e5; /* soft red background */
+    color: #d32f2f; /* dark red text */
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 10px;
+    border: 1px solid #f5c2c2;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    gap: 6px;
+}
+
+.out-of-stock i {
+    color: #d32f2f;
+    font-size: 1rem;
+}
+.out-of-stock:hover {
+    background-color: #fddede;
+    cursor: not-allowed;
+}
+</style>
+{% endblock %}

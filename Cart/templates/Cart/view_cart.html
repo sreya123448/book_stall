@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="wishlist-hero">
+    <h1 class="wishlist-title">Your Cart</h1>
+    <div class="wishlist-decoration">
+        <div class="decoration-circle"></div>
+        <div class="decoration-square"></div>
+        <div class="decoration-triangle"></div>
+    </div>
+</div>
+<div class="container">
+    <!-- <h1 class="book-section-title">Your Shopping Cart({{ cart_items|length }})</h1> -->
+
+
+<div class="cart-container">
+    {% if cart_items %}
+        <div class="cart-header">
+            <h1 class="cart-title">My Cart ({{ total_quantity }} items)</h1>
+        </div>
+        
+        <div class="cart-items-container">
+            {% for item in cart_items %}
+            <div class="cart-item">
+                <img 
+                    src="{% if item.book.cover_image %}{{ item.book.cover_image.url }}{% else %}{% static 'images/default-book.jpg' %}{% endif %}" 
+                    alt="{{ item.book.title }}" 
+                    class="item-image"
+                >
+                <div class="item-details">
+                    <h3 class="item-title">{{ item.book.title }}</h3>
+                    <p class="item-author">by {{ item.book.author }}</p>
+                    <div class="item-price">${{ item.book.price }}</div>
+                    
+                    <div class="item-actions">
+                        <form method="post" action="{% url 'cart:update_cart_item' item.id %}" class="quantity-form">
+                            {% csrf_token %}
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input">
+                            <button type="submit" class="update-btn">UPDATE</button>
+                        </form>
+                        
+                        <form method="post" action="{% url 'cart:remove_from_cart' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="remove-btn">
+                                <i class="fas fa-trash-alt"></i> 
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="price-summary">
+            <h3 class="summary-title">PRICE DETAILS</h3>
+            <div class="price-row">
+                <span>Price ({{ total_quantity }} items)</span>
+                <span>${{ subtotal }}</span>
+            </div>
+            <div class="price-row">
+                <span>Delivery Charges</span>
+                <span>${{ shipping_cost }}</span>
+            </div>
+            <div class="price-row price-total">
+                <span>Total Amount</span>
+                <span>${{ total_price }}</span>
+            </div>
+            <a href="{% url 'cart:checkout_cart' %}" class="checkout-btn">PROCEED TO CHECKOUT</a>
+        </div>
+    {% else %}
+        <div class="empty-cart">
+            <div class="empty-cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h2>Your Cart is Empty</h2>
+            <p>Looks like you haven't added any items yet</p>
+            <a href="{% url 'core:shop' %}" class="continue-btn">Continue Shopping</a>
+        </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

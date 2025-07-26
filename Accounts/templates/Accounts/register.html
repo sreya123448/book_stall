@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="login-wrapper">
+  <div class="login-box">
+    <div class="login-title">
+      <h2>Register</h2>
+    </div>
+
+    <form method="post" action="{% url 'accounts:register' %}">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="form-error">
+          {% for error in form.non_field_errors %}
+            {{ error }}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% for field in form %}
+        <div class="form-group">
+          {{ field.label_tag }}
+
+          {% if field.name == "password1" or field.name == "password2" %}
+  <div style="position: relative;">
+    {{ field }}
+    <span class="toggle-password" onclick="togglePassword(this)"
+          style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+      <i class="fa-solid fa-eye"></i>
+    </span>
+  </div>
+{% else %}
+  {{ field }}
+{% endif %}
+
+          {% if field.errors %}
+            <div class="form-error">{{ field.errors.0 }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn-login">Register</button>
+
+      <div class="register-link">
+        Already have an account? <a href="{% url 'accounts:login' %}">Login here</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Password Toggle Script -->
+<script>
+  function togglePassword(el) {
+    const input = el.previousElementSibling;
+    const icon = el.querySelector('i');
+    const type = input.type === 'password' ? 'text' : 'password';
+    input.type = type;
+
+    icon.classList.toggle('fa-eye');
+    icon.classList.toggle('fa-eye-slash');
+  }
+</script>
+
+
+<style>
+  input[type="password"] {
+    padding-right: 2.5rem;
+  }
+  .form-group {
+    position: relative;
+  }
+</style>
+
+{% endblock %}

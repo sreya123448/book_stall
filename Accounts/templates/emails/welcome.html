@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to BookNest!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .header h1 {
+            color: #2c3e50;
+        }
+        .content {
+            padding: 20px 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        .cta-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Welcome to Book Shore 📚</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{ user.first_name|default:user.email  }},</p>
+
+            <p>Thank you for registering at <strong>Book Shore</strong>! We're thrilled to have you as part of our book-loving community.</p>
+
+            <p>Start exploring thousands of books, find your next favorite read, and enjoy exclusive offers just for members like you.</p>
+    <p>We hope you enjoy browsing and buying great books with us.</p>
+    <p>Cheers,<br>Book Shore Team</p>
+        </div>
+        <div class="footer">
+            © {{ current_year }} Book Shore. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
