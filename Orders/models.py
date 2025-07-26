@@ -23,7 +23,7 @@ class Order(models.Model):
     )
     full_name    = models.CharField(max_length=100,blank=True, null=True)
     phone        = models.CharField(max_length=15,blank=True, null=True)
-    address = models.CharField(max_length=255, null=True, blank=True)
+    address = models.CharField(max_length=191, null=True, blank=True)
     city         = models.CharField(max_length=100,blank=True, null=True)
     state        = models.CharField(max_length=100,blank=True, null=True)
     zip_code     = models.CharField(max_length=10,blank=True, null=True)
