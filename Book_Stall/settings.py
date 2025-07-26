@@ -87,16 +87,28 @@ WSGI_APPLICATION = 'Book_Stall.wsgi.application'
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bookstall',  
+#         'USER': 'root',      
+#         'PASSWORD': 'mysqlroot1234',  
+#         'HOST': 'localhost',          
+#         'PORT': '3306',               
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bookstall',  # Replace with your database name
-        'USER': 'root',      # Replace with your MySQL username
-        'PASSWORD': 'mysqlroot1234',  # Replace with your MySQL password
-        'HOST': 'localhost',          # Or the database server address
-        'PORT': '3306',               # Default MySQL port
+        'NAME': 'sreya2002$bookstall',
+        'USER': 'sreya2002',
+        'PASSWORD': 'your_mysql_password',
+        'HOST': 'sreya2002.mysql.pythonanywhere-services.com',
+        'PORT': '3306',
     }
 }
+
 
 
 # Password validation
