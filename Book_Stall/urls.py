@@ -24,7 +24,8 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('Accounts/', include('Accounts.urls', namespace='accounts')),
     path('Cart/', include('Cart.urls', namespace='cart')), 
-    path('Core/', include('Core.urls', namespace='core')), 
+    path('', include('Core.urls', namespace='core')),         # homepage, e.g. /
+    path('Core/', include('Core.urls', namespace='core')),   
     path('Orders/', include('Orders.urls', namespace='orders')),  
     path('Store/', include('Store.urls')),
     path('Adminpanel/',include('Adminpanel.urls')), 
