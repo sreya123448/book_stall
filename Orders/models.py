@@ -78,7 +78,7 @@ class ShippingAddress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='shipping_addresses')
     full_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15)
-    address = models.CharField(max_length=255)
+    address = models.CharField(max_length=191)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=10)
