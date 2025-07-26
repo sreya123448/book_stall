@@ -5,7 +5,7 @@ app_name = 'core'
 
 urlpatterns = [
     path('base', views.Base, name='base'),
-    path('index', views.Index, name='index'),
+    path('', views.Index, name='index'),
     path('user_home', views.User_Home, name='user_home'),
     path('shop', views.Shop, name='shop'),
     path('book/<int:id>/', views.Book_Detail, name='book_detail'),
