@@ -16,31 +16,74 @@ from django.contrib import messages
 def Base(request):
     return render(request,'Core/base.html')
 
+# def Index(request):
+#     if request.user.is_authenticated:
+#         return redirect('core:user_home')
+#     categories = Category.objects.annotate(book_count=Count('books')).order_by('-book_count')
+    
+#     thirty_days_ago = timezone.now().date() - timedelta(days=30)
+#     new_arrivals = Book.objects.filter(
+#         available=True,
+#         publishing_date__gte=thirty_days_ago
+#     ).order_by('-publishing_date')[:8]
+#     if not new_arrivals:
+#        new_arrivals = Book.objects.filter(available=True).order_by('-publishing_date')[:8]
+    
+#     now_trending = Book.objects.filter(available=True).order_by('-stock')[:8]
+    
+#     offer_books = Book.objects.filter(
+#         is_offer=True,
+#         available=True
+#     ).filter(
+#         models.Q(offer_expiry__isnull=True) | models.Q(offer_expiry__gt=timezone.now())
+#     )[:8]  
+
+#     for book in offer_books:
+#         if book.original_price and book.original_price > book.price:
+#             discount = ((book.original_price - book.price) / book.original_price) * 100
+#             book.discount_percent = round(discount)
+#         else:
+#             book.discount_percent = 0
+
+#     featured_books = Book.objects.filter(available=True, featured=True)[:8]
+#     banners = Banner.objects.all()[:4] 
+#     return render(request, 'Core/index.html', {
+#         'categories': categories,
+#         'new_arrivals': new_arrivals,
+#         'now_trending': now_trending,
+#         'featured_books': featured_books,
+#         'banners': banners,
+#         'offer_books': offer_books,
+#         'now': timezone.now(), 
+#     })
+
 def Index(request):
     if request.user.is_authenticated:
         return redirect('core:user_home')
-    # Get categories
-    categories = Category.objects.annotate(book_count=Count('books')).order_by('-book_count')
-    
-    # New arrivals (last 30 days)
+
+    # Top categories by book count
+    categories = Category.objects.annotate(book_count=Count('books')).order_by('-book_count')[:6]
+
+    # New Arrivals - Last 30 days
     thirty_days_ago = timezone.now().date() - timedelta(days=30)
     new_arrivals = Book.objects.filter(
         available=True,
         publishing_date__gte=thirty_days_ago
     ).order_by('-publishing_date')[:8]
-    # fallback if no recent books
-    if not new_arrivals:
-       new_arrivals = Book.objects.filter(available=True).order_by('-publishing_date')[:8]
-    
-    # Trending (by stock)
+
+    if not new_arrivals.exists():
+        new_arrivals = Book.objects.filter(available=True).order_by('-publishing_date')[:8]
+
+    # Trending Books by stock (fallback if no sales tracking)
     now_trending = Book.objects.filter(available=True).order_by('-stock')[:8]
-    
+
+    # Offer Books - with valid expiry
     offer_books = Book.objects.filter(
         is_offer=True,
         available=True
     ).filter(
-        models.Q(offer_expiry__isnull=True) | models.Q(offer_expiry__gt=timezone.now())
-    )[:8]  
+        Q(offer_expiry__isnull=True) | Q(offer_expiry__gt=timezone.now())
+    )[:8]
 
     for book in offer_books:
         if book.original_price and book.original_price > book.price:
@@ -49,9 +92,14 @@ def Index(request):
         else:
             book.discount_percent = 0
 
-    # Featured books
+    # Featured Books
     featured_books = Book.objects.filter(available=True, featured=True)[:8]
-    banners = Banner.objects.all()[:4] 
+    if not featured_books.exists():
+        featured_books = Book.objects.filter(available=True).order_by('?')[:8]
+
+    # Banners (top 4)
+    banners = Banner.objects.all()[:4]
+
     return render(request, 'Core/index.html', {
         'categories': categories,
         'new_arrivals': new_arrivals,
@@ -59,8 +107,9 @@ def Index(request):
         'featured_books': featured_books,
         'banners': banners,
         'offer_books': offer_books,
-        'now': timezone.now(), 
+        'now': timezone.now(),
     })
+
 
 @login_required
 def User_Home(request):
