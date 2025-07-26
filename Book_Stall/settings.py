@@ -106,6 +106,9 @@ DATABASES = {
         'PASSWORD': 'mysqlroot1234',
         'HOST': 'sreya2002.mysql.pythonanywhere-services.com',
         'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
