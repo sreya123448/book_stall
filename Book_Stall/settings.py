@@ -103,7 +103,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sreya2002$bookstall',
         'USER': 'sreya2002',
-        'PASSWORD': 'your_mysql_password',
+        'PASSWORD': 'mysqlroot1234',
         'HOST': 'sreya2002.mysql.pythonanywhere-services.com',
         'PORT': '3306',
     }
